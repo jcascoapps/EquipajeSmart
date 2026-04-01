@@ -21,6 +21,7 @@ function App() {
   const [currentImgIndex, setCurrentImgIndex] = useState(0)
   const [visibleCount, setVisibleCount] = useState(12)
   const [isSticky, setIsSticky] = useState(false)
+  const [isZoomed, setIsZoomed] = useState(false)
   
   const observerTarget = useRef(null)
 
@@ -92,10 +93,6 @@ function App() {
           <div className="logo">
             <Plane className="logo-icon" size={20} />
             <span>EQUIPAJE<span style={{color: 'var(--accent)'}}>SMART</span></span>
-          </div>
-          <div className="nav-links">
-            <a href="#store">Colección</a>
-            <a href="#about">Contacto</a>
           </div>
         </div>
       </nav>
@@ -170,15 +167,15 @@ function App() {
             </button>
             <div className="modal-grid">
               <div className="modal-img-container">
-                <div className="gallery-main">
-                  <img src={selectedProduct.images[currentImgIndex]} alt={selectedProduct.name} className="gallery-img" />
+                <div className="gallery-main" onClick={() => setIsZoomed(true)} style={{cursor:'zoom-in'}}>
+                  <img src={selectedProduct.images[currentImgIndex]} alt={selectedProduct.name} className="gallery-img" title="Click para ampliar" />
                   
                   {selectedProduct.images.length > 1 && (
                     <>
-                      <button className="gallery-nav prev" onClick={() => setCurrentImgIndex(prev => (prev === 0 ? selectedProduct.images.length - 1 : prev - 1))}>
+                      <button className="gallery-nav prev" onClick={(e) => { e.stopPropagation(); setCurrentImgIndex(prev => (prev === 0 ? selectedProduct.images.length - 1 : prev - 1)); }}>
                         <ChevronLeft size={20} />
                       </button>
-                      <button className="gallery-nav next" onClick={() => setCurrentImgIndex(prev => (prev === selectedProduct.images.length - 1 ? 0 : prev + 1))}>
+                      <button className="gallery-nav next" onClick={(e) => { e.stopPropagation(); setCurrentImgIndex(prev => (prev === selectedProduct.images.length - 1 ? 0 : prev + 1)); }}>
                         <ChevronRight size={20} />
                       </button>
                     </>
@@ -237,6 +234,19 @@ function App() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {isZoomed && selectedProduct && (
+        <div className="lightbox-overlay" onClick={() => setIsZoomed(false)}>
+          <button className="lightbox-close">
+            <X size={24} />
+          </button>
+          <img 
+            src={selectedProduct.images[currentImgIndex]} 
+            alt={selectedProduct.name} 
+            className="lightbox-img" 
+          />
         </div>
       )}
     </div>
