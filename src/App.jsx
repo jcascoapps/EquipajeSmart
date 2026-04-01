@@ -21,6 +21,32 @@ function App() {
   const [currentImgIndex, setCurrentImgIndex] = useState(0)
   const [visibleCount, setVisibleCount] = useState(12)
   const [isSticky, setIsSticky] = useState(false)
+  const [isZoomed, setIsZoomed] = useState(false)
+  const [touchStart, setTouchStart] = useState(null)
+  const [touchEnd, setTouchEnd] = useState(null)
+
+  const minSwipeDistance = 50
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null)
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX)
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
+    
+    if (isLeftSwipe) {
+      setCurrentImgIndex(prev => (prev === selectedProduct.images.length - 1 ? 0 : prev + 1))
+    }
+    if (isRightSwipe) {
+      setCurrentImgIndex(prev => (prev === 0 ? selectedProduct.images.length - 1 : prev - 1))
+    }
+  }
   
   const observerTarget = useRef(null)
 
@@ -83,6 +109,12 @@ function App() {
   // Reset gallery index on product select
   useEffect(() => {
     setCurrentImgIndex(0)
+    if (selectedProduct) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    return () => { document.body.style.overflow = 'unset' }
   }, [selectedProduct])
 
   return (
@@ -92,10 +124,6 @@ function App() {
           <div className="logo">
             <Plane className="logo-icon" size={20} />
             <span>EQUIPAJE<span style={{color: 'var(--accent)'}}>SMART</span></span>
-          </div>
-          <div className="nav-links">
-            <a href="#store">Colección</a>
-            <a href="#about">Contacto</a>
           </div>
         </div>
       </nav>
@@ -170,20 +198,39 @@ function App() {
             </button>
             <div className="modal-grid">
               <div className="modal-img-container">
-                <div className="gallery-main">
-                  <img src={selectedProduct.images[currentImgIndex]} alt={selectedProduct.name} className="gallery-img" />
+                <div 
+                  className="gallery-main" 
+                  onClick={() => setIsZoomed(true)} 
+                  style={{cursor:'zoom-in'}}
+                  onTouchStart={onTouchStart}
+                  onTouchMove={onTouchMove}
+                  onTouchEnd={onTouchEnd}
+                >
+                  <img src={selectedProduct.images[currentImgIndex]} alt={selectedProduct.name} className="gallery-img" title="Click para ampliar" />
                   
                   {selectedProduct.images.length > 1 && (
                     <>
-                      <button className="gallery-nav prev" onClick={() => setCurrentImgIndex(prev => (prev === 0 ? selectedProduct.images.length - 1 : prev - 1))}>
+                      <button className="gallery-nav prev" onClick={(e) => { e.stopPropagation(); setCurrentImgIndex(prev => (prev === 0 ? selectedProduct.images.length - 1 : prev - 1)); }}>
                         <ChevronLeft size={20} />
                       </button>
-                      <button className="gallery-nav next" onClick={() => setCurrentImgIndex(prev => (prev === selectedProduct.images.length - 1 ? 0 : prev + 1))}>
+                      <button className="gallery-nav next" onClick={(e) => { e.stopPropagation(); setCurrentImgIndex(prev => (prev === selectedProduct.images.length - 1 ? 0 : prev + 1)); }}>
                         <ChevronRight size={20} />
                       </button>
                     </>
                   )}
                 </div>
+
+                {selectedProduct.images.length > 1 && (
+                  <div className="gallery-dots">
+                    {selectedProduct.images.map((_, i) => (
+                      <div 
+                        key={i} 
+                        className={`dot ${currentImgIndex === i ? 'active' : ''}`}
+                        onClick={(e) => { e.stopPropagation(); setCurrentImgIndex(i); }}
+                      />
+                    ))}
+                  </div>
+                )}
                 <div className="gallery-thumbs">
                   {selectedProduct.images.map((img, idx) => (
                     <img 
@@ -237,6 +284,19 @@ function App() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {isZoomed && selectedProduct && (
+        <div className="lightbox-overlay" onClick={() => setIsZoomed(false)}>
+          <button className="lightbox-close">
+            <X size={24} />
+          </button>
+          <img 
+            src={selectedProduct.images[currentImgIndex]} 
+            alt={selectedProduct.name} 
+            className="lightbox-img" 
+          />
         </div>
       )}
     </div>
