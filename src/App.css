@@ -339,6 +339,31 @@
 .gallery-nav.prev { left: 1rem; }
 .gallery-nav.next { right: 1rem; }
 
+.gallery-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  background: white;
+  border-bottom: 1px solid var(--border-subtle, #f1f5f9);
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--secondary);
+  opacity: 0.3;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.dot.active {
+  opacity: 1;
+  background: var(--primary);
+  transform: scale(1.2);
+}
+
 .gallery-thumbs {
   display: flex;
   gap: 0.5rem;
