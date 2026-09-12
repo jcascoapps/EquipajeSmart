@@ -125,7 +125,7 @@ export default function WishlistDrawer({
                         <a 
                           href={product.amazonUrl} 
                           target="_blank" 
-                          rel="noopener noreferrer" 
+                          rel="nofollow sponsored noopener noreferrer" 
                           className="drawer-amazon-link"
                           title="Comprar en Amazon"
                         >

@@ -28,6 +28,8 @@ import gadgetsData from './data/gadgets.json'
 import GuidePage from './GuidePage'
 import TravelToolsModal from './components/TravelToolsModal'
 import WishlistDrawer from './components/WishlistDrawer'
+import LegalModal from './components/LegalModal'
+import CookieBanner from './components/CookieBanner'
 import WhatsAppIcon from './components/WhatsAppIcon'
 import { copyTextToClipboard } from './utils/clipboard'
 import './App.css'
@@ -120,11 +122,19 @@ function App() {
   const [toolsModalOpen, setToolsModalOpen] = useState(false)
   const [toolsInitialTab, setToolsInitialTab] = useState('airlines')
   const [wishlistOpen, setWishlistOpen] = useState(false)
+  const [legalModalOpen, setLegalModalOpen] = useState(false)
+  const [legalInitialTab, setLegalInitialTab] = useState('legal')
 
   const openTools = (tab = 'airlines') => {
     setToolsInitialTab(tab);
     setToolsModalOpen(true);
     trackEvent('open_travel_tools', { tab });
+  }
+
+  const openLegal = (tab = 'legal') => {
+    setLegalInitialTab(tab);
+    setLegalModalOpen(true);
+    trackEvent('open_legal_modal', { tab });
   }
 
   // Filtros y Productos
@@ -629,11 +639,44 @@ function App() {
       )}
 
       <footer className="footer">
-        <div className="container">
-          <p className="text-muted">© 2026 EquipajeSmart. Todos los derechos reservados.</p>
-          <p className="text-muted" style={{fontSize:'0.75rem', marginTop:'8px'}}>
-            Como afiliados de Amazon, recibimos comisiones por compras cualificadas en Amazon.es sin coste adicional para ti.
-          </p>
+        <div className="container footer-content">
+          <div className="footer-brand">
+            <div 
+              className="logo" 
+              onClick={() => navigateTo('home')} 
+              style={{ cursor: 'pointer' }}
+              title="Ir a la página principal"
+            >
+              <Plane className="logo-icon" size={20} />
+              <span>EQUIPAJE<span style={{color: 'var(--accent)'}}>SMART</span></span>
+            </div>
+            <p className="footer-desc">
+              Guía y catálogo independiente de equipamiento y accesorios de cabina para viajar ligero sin facturar.
+            </p>
+          </div>
+
+          <div className="footer-links-row">
+            <button className="footer-legal-link" onClick={() => openLegal('legal')}>
+              Aviso Legal & Afiliados
+            </button>
+            <span className="footer-sep">•</span>
+            <button className="footer-legal-link" onClick={() => openLegal('privacy')}>
+              Política de Privacidad
+            </button>
+            <span className="footer-sep">•</span>
+            <button className="footer-legal-link" onClick={() => openLegal('cookies')}>
+              Política de Cookies
+            </button>
+          </div>
+
+          <div className="footer-disclaimer-box">
+            <p className="text-muted" style={{ fontSize: '0.75rem', marginBottom: '6px' }}>
+              © 2026 EquipajeSmart. Todos los derechos reservados.
+            </p>
+            <p className="affiliate-disclosure">
+              * <strong>Declaración de Afiliación:</strong> En calidad de Afiliado de Amazon, EquipajeSmart obtiene ingresos por las compras adscritas que cumplen los requisitos aplicables. Amazon y el logotipo de Amazon son marcas comerciales de Amazon.com, Inc. o de sus filiales. Los precios y la disponibilidad están sujetos a cambios en Amazon.es.
+            </p>
+          </div>
         </div>
       </footer>
 
@@ -710,7 +753,7 @@ function App() {
                   <a 
                     href={selectedProduct.amazonUrl} 
                     target="_blank" 
-                    rel="noopener noreferrer" 
+                    rel="nofollow sponsored noopener noreferrer" 
                     className="amazon-cta"
                     onClick={() => trackEvent('click_amazon_affiliate', { id: selectedProduct.id, name: selectedProduct.name, price: selectedProduct.price })}
                   >
@@ -757,7 +800,7 @@ function App() {
                     <a 
                       href={selectedProduct.amazonUrl} 
                       target="_blank" 
-                      rel="noopener noreferrer"
+                      rel="nofollow sponsored noopener noreferrer"
                       className="more-details-link"
                     >
                       Ver todas las especificaciones y opiniones en Amazon.es
@@ -800,6 +843,16 @@ function App() {
         onSelectProduct={(product) => openProductModal(product)}
         trackEvent={trackEvent}
       />
+
+      {/* Modal de Información Legal, Privacidad y Cookies */}
+      <LegalModal 
+        isOpen={legalModalOpen}
+        onClose={() => setLegalModalOpen(false)}
+        initialTab={legalInitialTab}
+      />
+
+      {/* Banner de Cookies no invasivo */}
+      <CookieBanner onOpenCookiesInfo={(tab) => openLegal(tab)} />
 
       {/* Cajón Menú Móvil (Root Level para evitar recortes) */}
       {mobileMenuOpen && (
@@ -850,6 +903,14 @@ function App() {
               >
                 <Heart size={18} fill={favorites.length > 0 ? 'var(--accent)' : 'none'} />
                 <span>Mi Maleta {favorites.length > 0 ? `(${favorites.length})` : ''}</span>
+              </button>
+
+              <button 
+                className="mobile-nav-item"
+                onClick={() => { setMobileMenuOpen(false); openLegal('legal'); }}
+              >
+                <ShieldCheck size={18} />
+                <span>Aviso Legal & Privacidad</span>
               </button>
             </div>
 
