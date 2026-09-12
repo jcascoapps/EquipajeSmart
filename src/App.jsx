@@ -40,6 +40,9 @@ const trackEvent = (eventName, data = {}) => {
     if (typeof window !== 'undefined') {
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({ event: eventName, timestamp: Date.now(), ...data });
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', eventName, data);
+      }
     }
     const metricsHistory = JSON.parse(sessionStorage.getItem('es_metrics') || '[]');
     metricsHistory.push({ event: eventName, data, time: new Date().toISOString() });
